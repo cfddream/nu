@@ -1,260 +1,306 @@
 #!/usr/bin/env sh
-# vim: ft=sh
+# vim: ft=sh ts=2 sw=2 st=2
 
-# Node Version Manager
-
-VERSION="0.0.1"
+# Node Virtual Environments
+_NU_VERSION="0.0.1"
+_N_="__nu__"
+TAR_SUFFIX="tar.gz"
 
 NODE_SITE="http://nodejs.org"
 NODE_DIST="$NODE_SITE/dist/"
-TAR_SUFFIX="tar.gz"
 
-_TABS_="    "
-
-ensure_dir() {
-    local dir="$1" txt="$2"
-    test -d "$dir" || mkdir -p "$dir" \
-        || abort "$txt"
+_U_() {
+  local f=$1; shift
+  ${_N_}$f $@
 }
 
-abort() {
-    echo "$@" >&2 && exit 1
-}
-
-nu_config() {
-    NU_DIR=${NU_DIR-/usr/local/lib/nu}
-    ensure_dir $NU_DIR "Failed to create versions directory \
-        ($NU_DIR), do you have permissions to do this?"
-    
-    export NU_DIR
-    export NU_SRC="$NU_DIR/src"
-    
-    ensure_dir $NU_SRC "Couldn't create $NU_SRC"
-}
-
-main () {
-    nu_get
-    nu_config
-
-    if test $# -eq 0; then
-        nu_help
-    else
-        while test $# -ne 0; do
-            case $1 in
-                -h|--help|help) nu_help ;;
-                -V|--version) nu_version ;;
-                -lns|lns) nu_list_nversions ;;
-                -ls|ls|list) nu_list_versions ;;
-                --latest|--stable) nu_latest ;;
-                current) nu_current ;;
-                install) nu_install ${@:2:$#}; exit ;;
-                latest) shift; nu_install `$0 --latest` $@; exit ;;
-                use) shift; nu_use $@ ;;
-            esac
-            shift
-        done
-    fi
-}
-
-# Check curl or wget.
-nu_get() {
-    # curl / wget support
-
-    # wget support (Added --no-check-certificate for Github downloads)
-    which wget > /dev/null && GET="wget --no-check-certificate -q -O-"
-
-    # curl support
-    which curl > /dev/null && GET="curl -# -L"
-
-    # Ensure we have curl or wget
-    test -n "$GET" && export GET || echo "curl or wget required"
-}
-
-#
-nu_check_current_version() {
-    which node &> /dev/null && active=`node -v` && active=${active#v}
-}
-
-nu_current() {
-    nu_check_current_version
-    echo "$_TABS_$active"
-}
-
-# Display the node latest
-nu_latest() {
-    $GET 2> /dev/null $NODE_DIST \
-        | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
-        | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-        | tail -n1
-}
-
-# Display the versions of node available.
-nu_list_nversions() {
-    nu_check_current_version
-    local versions=`$GET 2> /dev/null $NODE_DIST \
-        | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
-        | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-        | awk '{ print "  " $1 }'`
-
-    test ${#versions} -eq "0" && abort "N/A"
-
-    for v in $versions; do
-        if test "$active" = "$v"; then
-            echo "  \033[32mο $v \033[0m"
-        else
-            if test -d $NU_DIR/$v; then
-                echo "  * $v \033[0m"
-            else
-                echo "$_TABS_$v"
-            fi
-        fi
+__nu__main() {
+  if test $# -eq 0; then
+    _U_ 'help'
+    return
+  else
+    _U_ 'get'
+    _U_ 'config'
+    while test $# -ne 0; do
+      case $1 in
+        -h|--help|help) _U_ 'help' ;;
+        -V|--version) _U_ 'version' ;;
+        -i|i|install) shift; _U_ 'install' $@ ;;
+        -r|r|remove) shift; _U_ 'remove' $@ ;;
+        --latest) _U_ 'latest' ;;
+        -ls|ls|list) _U_ 'list_versions' ;;
+        -lns|lns) _U_ 'list_nversions' ;;
+        current) _U_ 'current' ;;
+        run) shift; _U_ 'run' $@ ;;
+        use) shift; _U_ 'use' $@ ;;
+        *) _U_ help ;;
+      esac
+      shift
     done
+  fi
 }
 
-nu_list_versions() {
-    nu_check_current_version
-    local versions=`ls -la -I 'src' $NU_DIR \
-        | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
-        | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
-        | awk '{ print "  " $1 }'`
+__nu__get() {
+  # curl / wget support
+  # wget support (Added --no-check-certificate for Github downloads)
+  which wget > /dev/null && GET="wget --no-check-certificate -q -O-"
 
-    test ${#versions} -eq "0" && abort "N/A"
+  # curl support
+  which curl > /dev/null && GET="curl -# -L"
 
-    for v in $versions; do
-        if test "$active" = "$v"; then
-            echo "  \033[32mο $v \033[0m"
-        else
-            echo "$_TABS_$v"
-        fi
-    done
+  # Ensure we have curl or wget
+  test -n "$GET" && export GET || echo "curl or wget required"
 }
 
-nu_use() {
-    test -z $1 && abort "version required."
-    local version=${1#v}
-    local bin=$NU_DIR/$version/bin/node
+__nu__config() {
+  NU_DIR=${NU_DIR-/usr/local/lib/nu}
+  __nu__ensuredir $NU_DIR "Failed to create versions directory \
+    ($NU_DIR), do you have permissions to do this?"
+    
+  export NU_DIR
+  export NU_SRC="$NU_DIR/src"
+    
+  __nu__ensuredir $NU_SRC "Couldn't create $NU_SRC"
+}
 
-    shift
+__nu__check_current() {
+  which node &> /dev/null && active=`node -v` && active=${active#v}
+}
 
-    if test -f $bin; then
-        $bin $@
+__nu__current() {
+  _U_ 'check_current'
+  echo "v$active"
+}
+
+__nu__latest() {
+  (`echo $GET` 2> /dev/null $NODE_DIST \
+    | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
+    | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
+    | tail -n1)
+}
+
+__nu__ensuredir() {
+  local dir="$1" txt="$2"
+  test -d "$dir" || mkdir -p "$dir" \
+    || __nu__abort "$txt"
+}
+
+__nu__log() {
+  echo "$@"
+}
+
+__nu__abort() {
+  echo "$@" 1>&2
+}
+
+__nu__wcl() {
+  local c=`echo $1 | wc -m`
+  test $c -eq "1" && __nu__log 'N/A' && return 0
+  return 1
+}
+
+__nu__list_nversions() {
+  local vers="$(`echo $GET` 2> /dev/null $NODE_DIST \
+    | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
+    | sort -u -k 1,1n -k 2,2n -k 3,3n -t .)" 
+
+  (__nu__wcl $vers || return)
+
+  echo $vers | _U_ 'printlist' \
+    || return 1
+}
+
+__nu__list_versions() {
+  _U_ 'check_current'
+  local vers="`ls -la -I 'src' $NU_DIR \
+    | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
+    | sort -u -k 1,1n -k 2,2n -k 3,3n -t .`"
+
+  (__nu__wcl $vers || return)
+
+  echo $vers | _U_ 'printlist' ' ' ' ' \
+    || return 1
+}
+
+__nu__printlist() {
+  _U_ 'check_current'
+  local i=0
+  local v a=""
+  local s=${1:-"*"} o=${2:-"o"}
+  while read v; do
+    if test -z $a && test "$active" = "$v"; then
+      a="1"
+      v="\033[32m$v $o\033[0m"
+    elif test -d $NU_DIR/$v; then
+      v="\033[33m$v $s\033[0m"
+    fi
+
+    if test $i -eq 4; then
+      i=0
+      echo "$v"
     else
-        abort "$_TABS_$version is not installed."
+      let 'i = i + 1'
+      echo -ne "$v   \t"
     fi
+  done
+  test $i -ne 0 && echo ""
+  return 0
 }
 
-# Display nu version.
-nu_version() {
-    echo $VERSION && exit 0
+__nu__cut() {
+  echo $(echo $1 | cut -d '.' -f $2)
 }
 
-# Install node <version> [config ...]
-nu_install() {
-    local version=$1; shift
-    local config=$@
-    nu_check_current_version
-
-    # remove "v"
-    version=${version#v}
+__nu__match() {
+  local v=$1 n=3 n1 n2 n3
+  n1=$(__nu__cut $v 1)
+  n2=$(__nu__cut $v 2)
+  n3=$(__nu__cut $v 3)
     
-    local dir=$NU_DIR/$version
+  if test $n2 -le "1" && test $n3 -le "9"; then
+    n=1
+  elif test $n2 -le "4"; then
+    n=2
+  elif test $n2 -eq "5" && test $n3 -eq "0"; then
+    n=2
+  fi
 
-    test "$active" = "$version" && test -d "$dir" \
-        && echo "$version is already installed." && exit 0
+  echo $n
+}
 
-    local t=$(nu_match $version)
+__nu__cleanup() {}
 
-    local filename="node-v$version"
-    local file="$filename.$TAR_SUFFIX"
-    local logpath="/tmp/nu.log"
+__nu__run() {
+  test -z $1 && __nu__abort "version required." && return
+  local version=${1#v}
+  local bin=$NU_DIR/$version/bin/node
 
-    local tarball="node-"$(test $t -gt "1" && echo "v")$version
+  shift
 
-    # 0.0.1 <= $version <= 0.1.9
-    # 0.1.100 <= $version <= 0.5.0
-    # 0.5.1 <= $version
-    local url=$NODE_DIST$(test $t -eq "3" && echo "v$version/")"$tarball.$TAR_SUFFIX"
+  if test -f $bin; then
+    echo "Running node v$version."
+    $bin $@
+  else
+    __nu__abort "v$version is not installed."
+  fi
+}
 
-    echo $url
+__nu__use() {
+  test $# -ne 1 && nu_help
+  local version=${1#v}
 
-    cd $NU_SRC \
-        && $GET $url \
-        > $file \
-        && tar -zxf $file > $logpath 2>&1
+  ! test -d $NU_DIR/$version \
+    && __nu__abort "v$version is not installed." \
+    && return
 
-    # see if things are alright
-    if test $? -gt 0; then
-        echo "\033[31mError: installation failed\033[0m"
-        echo "  node version $version does not exist,"
-        echo "  n failed to fetch the tarball,"
-        echo "  or tar failed. Try a different"
-        echo "  version or view $logpath to view"
-        echo "  error details."
-        exit 1
-    fi
+  __nu__check_current
 
-    test $filename != $tarball && mv $tarball $filename > $logpath 2>&1
+  test "$active" = "$version" \
+    && __nu__abort "$version is already activated." \
+    && return 0
 
-    cd $NU_SRC/$filename \
-        && ./configure --prefix=$NU_DIR/$version $config \
-        && JOBS=4 make install
+  local bin=$NU_DIR/$version/bin
+  local lib=$NU_DIR/$version/lib
+  local man=$NU_DIR/$version/man
+
+  if [[ $PATH == *$NU_DIR/*/bin* ]]; then
+    PATH=${PATH%$NU_DIR/*/bin*}$bin${PATH#*$NU_DIR/*/bin}
+  else
+    PATH="$bin:$PATH"
+  fi
+
+  if [[ $MANPATH == *$NU_DIR/*/share/man* ]]; then
+    MANPATH=${MANPATH%$NU_DIR/*/share/man*}$NU_DIR/$version/share/man${MANPATH#*$NU_DIR/*/share/man}
+  else
+    MANPATH="$man:$MANPATH"
+  fi
+
+  echo "Now using node v$version."
+  export PATH
+  hash -r
+  export MANPATH
+  npm_config_binroot="$bin"
+  npm_config_root="$lib"
+  npm_config_manroot="$man"
+  NODE_PATH="$lib"
+  #"$SHELL"
+}
+
+__nu__install() {
+  local version=$1; shift
+  local config=$@
+  _U_ 'check_current'
+
+  # remove "v"
+  version=${version#v}
+
+  local dir=$NU_DIR/$version
+  test "$active" = "$version" && test -d "$dir" \
+    && __nu__abort "$version is already installed."
+
+  local t=$(__nu__match $version)
+
+  local filename="node-v$version"
+  local file="$filename.$TAR_SUFFIX"
+  local logpath="/tmp/nu.log"
+
+  local tarball="node-"$(test $t -gt "1" && echo "v")$version
+
+  # 0.0.1 <= $version <= 0.1.9
+  # 0.1.100 <= $version <= 0.5.0
+  # 0.5.1 <= $version
+  local url=$NODE_DIST$(test $t -eq "3" && echo "v$version/")"$tarball.$TAR_SUFFIX"
+
+  echo $url
+
+  (cd $NU_SRC \
+    && `echo $GET` $url \
+    > $file \
+    && tar -zxf $file > $logpath 2>&1)
+
+  # see if things are alright
+  if test $? -gt 0; then
+    echo "\033[31mError: installation failed\033[0m"
+    echo "  node version $version does not exist,"
+    echo "  n failed to fetch the tarball,"
+    echo "  or tar failed. Try a different"
+    echo "  version or view $logpath to view"
+    echo "  error details."
+    return 0
+  fi
+
+  test "$filename" != "$tarball" && mv $tarball $filename > $logpath 2>&1
+
+  (cd $NU_SRC/$filename \
+    && ./configure --prefix=$NU_DIR/$version $config \
+    && JOBS=4 make \
+    || __nu__abort "$version make failed." \
+    && make install)
 
 }
 
-nu_cut() {
-    echo $(echo $1 | cut -d '.' -f $2)
-}
+__nu__remove() {}
 
-nu_match() {
-    local v=$1 n=3 n1 n2 n3
-    n1=$(nu_cut $v 1)
-    n2=$(nu_cut $v 2)
-    n3=$(nu_cut $v 3)
-    
-    if test $n2 -le "1" && test $n3 -le "9"; then
-        n=1
-    elif test $n2 -le "4"; then
-        n=2
-    elif test $n2 -eq "5" && test $n3 -eq "0"; then
-        n=2
-    fi
+__nu__help() {
+  cat <<-help
 
-    echo $n
-}
-
-# Display help.
-nu_help() {
-    cat <<-EOF
-  Node Version Manager
   Usage: nu [options] [COMMAND] [config] 
 
   Commands:
-
-    nu                           Output versions installed
-    nu latest [config ...]       Install or activate the latest node release
-    nu <version> [config ...]    Install and/or use node <version>
-    nu use <version> [args ...]  Execute node <version> with [args ...]
-    nu npm <version> [args ...]  Execute npm <version> with [args ...]
-    nu bin <version>             Output bin path for <version>
-    nu rm <version ...>          Remove the given version(s)
-    nu --latest                  Output the latest node version available
-    nu current                   Output the current node version
-    nu install                   Install
-    nu lns                       Output the versions of node available
+    nu --latest                 Output the latest node version available
 
   Options:
 
-    -V, --version   Output current version of n
-    -h, --help      Display help information
+    -V, --version               Output current version of nu
+    -h, --help                  Display help information
 
-  Aliases:
-
-    -       rm
-    which   bin
-    use     as
-    list    ls
-EOF
-    exit 0
+help
 }
 
-main "$@"
+__nu__version() {
+  echo $_NU_VERSION
+}
+
+nu() {
+  __nu__main "$@"
+}
