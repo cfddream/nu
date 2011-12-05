@@ -38,6 +38,11 @@ NU
         lns                 -lns
         current     curr
 
+### Thanks to:
+* [isaacs](https://github.com/isaacs) - [nave](https://github.com/isaacs/nave)
+* [creationix](https://github.com/creationix) - [nvm](https://github.com/creationix/nvm)
+* [visionmedia](https://github.com/visionmedia) - [n](https://github.com/visionmedia/n)
+
 ### ToDo：
 * 提供不同版本 changelog 信息
 * 提供不同版本 npm 包管理器
