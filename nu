@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 # vim: ft=sh ts=2 sw=2 st=2
-
+#         _  __ _ __
+#        / |/ //// /
+#       / || // U / 
+#      /_/|_/ \_,'  
+#
 # Node Virtual Environments
 
 _NU_VERSION="0.0.1"
