@@ -2,7 +2,7 @@ NU
 ==
 > Node Virtual Environments
 
-## Usage:
+### Usage:
 
     Usage: nu [options] [COMMAND] [config] 
 
@@ -26,3 +26,8 @@ NU
         list        ls      -ls
         lns                 -lns
         current     curr
+
+### ToDo：
+* 提供不同版本 changelog 信息
+* 提供不同版本 npm 包管理器
+* ...
