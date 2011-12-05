@@ -2,6 +2,11 @@ NU
 ==
 > Node Virtual Environments
 
+### Installation:
+
+    > git clone git://github.com/cfddream/nu.git ~/nu
+    > source ~/nu/nu
+
 ### Usage:
 
     Usage: nu [options] [COMMAND] [config] 
