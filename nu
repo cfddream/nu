@@ -2,6 +2,7 @@
 # vim: ft=sh ts=2 sw=2 st=2
 
 # Node Virtual Environments
+
 _NU_VERSION="0.0.1"
 _N_="__nu__"
 TAR_SUFFIX="tar.gz"
@@ -12,6 +13,7 @@ NODE_DIST="$NODE_SITE/dist/"
 _U_() {
   local f=$1; shift
   ${_N_}$f $@
+  return 1
 }
 
 __nu__main() {
@@ -28,12 +30,14 @@ __nu__main() {
         -i|i|install) shift; _U_ 'install' $@ ;;
         -r|r|remove) shift; _U_ 'remove' $@ ;;
         --latest) _U_ 'latest' ;;
+        latest) shift; _U_ 'install' `__nu__latest` $@ ;;
         -ls|ls|list) _U_ 'list_versions' ;;
         -lns|lns) _U_ 'list_nversions' ;;
-        current) _U_ 'current' ;;
+        now|current) _U_ 'current' ;;
         run) shift; _U_ 'run' $@ ;;
         use) shift; _U_ 'use' $@ ;;
-        *) _U_ help ;;
+        bin) _U_ 'binpath' $2; return ;;
+        *) _U_ 'help' ;;
       esac
       shift
     done
@@ -70,6 +74,15 @@ __nu__check_current() {
 __nu__current() {
   _U_ 'check_current'
   echo "v$active"
+}
+
+__nu__bin() {
+  local v=${1#v}
+  (test $# -eq 0 \
+    && echo `which node`) \
+    || (test -d "$NU_DIR/$v/bin" \
+    && echo "$NU_DIR/$v/bin") \
+    || echo "N/A" && return
 }
 
 __nu__latest() {
@@ -287,12 +300,25 @@ __nu__help() {
   Usage: nu [options] [COMMAND] [config] 
 
   Commands:
-    nu --latest                 Output the latest node version available
+    nu --latest                         Output the latest node version available
+    nu latest [config ...]              Install latest version node
+    nu install <version> [config ...]   Install <version> node
+    nu list                             Output the versions installed
+    nu lns                              Output the versions of node available
+    nu current                          Output the current node version
+    nu use <version> [args ...]         Use node <version> with [args ...]
+    nu run <version> [args ...]         Run node <version> with [args ...]
+    nu bin <version>                    Output bin path for <version>
 
   Options:
+    -V, --version                       Output current version of nu
+    -h, --help                          Display help information
 
-    -V, --version               Output current version of nu
-    -h, --help                  Display help information
+  Aliases:
+    install     i       -i
+    list        ls      -ls
+    lns                 -lns
+    current     curr
 
 help
 }
