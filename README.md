@@ -1,10 +1,12 @@
 NU
 ==
 > Node Virtual Environments
+<pre>
          _  __ _ __
         / |/ //// /
        / || // U / 
       /_/|_/ \_,'
+</pre>
 
 ### Installation:
 
