@@ -33,7 +33,7 @@ __nu__main() {
         latest) shift; _U_ 'install' `__nu__latest` $@ ;;
         -ls|ls|list) _U_ 'list_versions' ;;
         -lns|lns) _U_ 'list_nversions' ;;
-        now|current) _U_ 'current' ;;
+        now|curr|current) _U_ 'current' ;;
         run) shift; _U_ 'run' $@ ;;
         use) shift; _U_ 'use' $@ ;;
         bin) _U_ 'binpath' $2; return ;;
@@ -318,7 +318,7 @@ __nu__help() {
     install     i       -i
     list        ls      -ls
     lns                 -lns
-    current     curr
+    current     now/curr
 
 help
 }
