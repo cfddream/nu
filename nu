@@ -92,7 +92,7 @@ __nu__install() {
 
   echo $url
 
-  (cd $NU_SRC \
+  (cd "$NU_DIR/src" \
     && `echo $GET` $url \
     > $file \
     && tar -zxf $file > $LOGPATH 2>&1)
@@ -105,7 +105,7 @@ __nu__install() {
 
   test "$filename" != "$tarball" && mv $tarball $filename > $LOGPATH 2>&1
 
-  (cd $NU_SRC/$filename \
+  (cd "$NU_DIR/src/$filename" \
     && ./configure --prefix=$NU_DIR/$version $config \
     && JOBS=4 make \
     || echo "$vversion make failed." \
@@ -201,7 +201,7 @@ __nu__download() {
     # 0.5.1 <= $version
     url=$NODE_DIST$(test $t -eq "3" && echo "v$v/")"$tarball.$TAR_SUFFIX"
     echo $url
-    (cd $NU_SRC \
+    (cd "$NU_DIR/src" \
       && `echo $GET` $url \
       > $file)
   done
@@ -288,11 +288,11 @@ __nu__printlist() {
 
 __nu__ensuredir() {
   test -d $1 \
-    || mkdir -p $1 2> /dev/null \
+    || mkdir -p "$1/src" 2> /dev/null \
     || (echo "Failed to create ($NU_DIR) directory, \
 do you have permissions to do this?" \
       && return 1) \
-    || return 1
+    || return 1 
 }
 
 __nu__get() {
@@ -303,13 +303,11 @@ __nu__get() {
 
 __nu__config() {
   __nu__ensuredir $NU_DIR || return 1
-  __nu__ensuredir $NU_SRC || return 1
 }
 
 __nu__init() {
   NU_VERSION="0.0.1"
   NU_DIR="${NU_DIR-/usr/local/lib/nu}"
-  NU_SRC="$NU_DIR/src"
 
   NODE_SITE="http://nodejs.org"
   NODE_DIST="$NODE_SITE/dist/"
