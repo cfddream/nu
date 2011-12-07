@@ -2,7 +2,7 @@
   "author": "FangDun Cai <cfddream@gmail.com> (www.kissdry.com)",
   "name": "nu",
   "description": "Node Virtual Environments",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/cfddream/nu",
   "repository": {
     "type": "git",
@@ -11,5 +11,6 @@
   "engines": {
     "node": "*"
   },
-  "bin": {"nu": "./nu"}
+  "bin": {"nn": "./nn"},
+  "keywords": ["node", "binary", "version", "env", "virtual"]
 }
