@@ -12,7 +12,6 @@ NU
 
     > npm install nu -g
     > nn
-    > source nu
 
     or
 
