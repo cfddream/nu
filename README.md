@@ -10,6 +10,12 @@ NU
 
 ### Installation:
 
+    > npm install nu -g
+    > nn
+    > source nu
+
+    or
+
     > git clone git://github.com/cfddream/nu.git ~/nu
     > source ~/nu/nu
 
