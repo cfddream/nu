@@ -11,5 +11,7 @@ cat <<-help
 
 help
 
+echo "exec this command or add it to ~/.bashrc ~/.zshrc"
 echo  "> \033[32msource $(dirname `readlink -f $0`)/nu\033[0m"
-echo "Have Fine.\n"
+
+echo "Have Fun.\n"
