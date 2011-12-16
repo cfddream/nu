@@ -104,7 +104,7 @@ __nu__install() {
   fi
   
   test "$filename" != "$tarball" \
-    && (cd "$NU_DIR/src" && mv $tarball $filename > $LOGPATH 2>&1
+    && (cd "$NU_DIR/src" && mv $tarball $filename > $LOGPATH 2>&1)
 
   (cd "$NU_DIR/src/$filename" \
     && ./configure --prefix=$NU_DIR/$version $config \
