@@ -102,8 +102,9 @@ __nu__install() {
     echo "\033[31mError: installation failed\033[0m"
     return 1
   fi
-
-  test "$filename" != "$tarball" && mv $tarball $filename > $LOGPATH 2>&1
+  
+  test "$filename" != "$tarball" \
+    && (cd "$NU_DIR/src" && mv $tarball $filename > $LOGPATH 2>&1
 
   (cd "$NU_DIR/src/$filename" \
     && ./configure --prefix=$NU_DIR/$version $config \
