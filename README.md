@@ -33,6 +33,7 @@ NU
       nu use <version> [args ...]         Use node <version> with [args ...]
       nu run <version> [args ...]         Run node <version> with [args ...]
       nu bin <version>                    Output bin path for <version>
+      nu changelog <version>              Output changelog for <version>
 
     Options:
       -V, --version                       Output current version of nu
@@ -44,6 +45,7 @@ NU
       lns                 -lns
       download    down    -d
       current     now/curr
+      changelog   log
 
 ### Thanks to:
 * [isaacs](https://github.com/isaacs) - [nave](https://github.com/isaacs/nave)
