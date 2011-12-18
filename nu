@@ -23,6 +23,7 @@ __nu__help() {
     nu use <version> [args ...]         Use node <version> with [args ...]
     nu run <version> [args ...]         Run node <version> with [args ...]
     nu bin <version>                    Output bin path for <version>
+    nu changelog <version>              Output changelog for <version>
 
   Options:
     -V, --version                       Output current version of nu
@@ -34,6 +35,7 @@ __nu__help() {
     lns                 -lns
     download    down    -d
     current     now/curr
+    changelog   log
 
 help
 }
@@ -50,6 +52,7 @@ __nu__main() {
   case $1 in
     -v | v | version ) __nu__version ;;
     i | install ) shift; __nu__install $@ ;;
+    changelog | log ) shift; __nu__changelog $@ ;;
     bin ) shift; __nu__bin $@ ;;
     run ) shift; __nu__run $@ ;;
     use ) shift; __nu__use $@ ;;
@@ -65,6 +68,30 @@ __nu__main() {
 
 __nu__version() {
   echo $NU_VERSION
+}
+
+__nu__changelog() {
+  local version=$1
+  echo "  \033[32mv$version\033[0m ChangeLog: "
+  local vers="$(`echo $GET` 2> /dev/null $NODE_DIST \
+    | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
+    | sort -u -k 1,1n -k 2,2n -k 3,3n -t .)" 
+
+  local i=$(echo $vers | sed -n "/$version/=")
+  let 'i = i + 1'
+  local after=$(echo $vers | sed -n "$i"'p')
+  local url="$NODE_TAGS"
+  test -n "$after" && url="$url?after=v$after"
+  #echo $url
+
+  local logs="$(`echo $GET` 2> /dev/null $url)"
+  #echo $logs
+
+  local s=$(echo $logs | sed -n "/v$version.zip/=")
+  let 's = s + 1'
+  local e=$(echo $logs | sed -n "/zipball\/v$version\" rel=\"nofollow\">ZIP<\/a>/=")
+  let 'e = e - 2'
+  echo $logs | sed -n "$s,$e"'p' | sed '/^$/d'
 }
 
 __nu__install() {
@@ -312,6 +339,7 @@ __nu__init() {
 
   NODE_SITE="http://nodejs.org"
   NODE_DIST="$NODE_SITE/dist/"
+  NODE_TAGS="https://github.com/joyent/node/tags"
 
   TAR_SUFFIX="tar.gz"
   LOGPATH="/tmp/nu.log"
