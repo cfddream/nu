@@ -72,6 +72,7 @@ __nu__version() {
 
 __nu__changelog() {
   local version=${1#v}
+  test -z "$version" && version=$(echo `__nu__latest`)
   echo "  \033[32mv$version\033[0m ChangeLog: "
   local vers="$(`echo $GET` 2> /dev/null $NODE_DIST \
     | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
