@@ -34,6 +34,7 @@ NU
       nu run <version> [args ...]         Run node <version> with [args ...]
       nu bin <version>                    Output bin path for <version>
       nu changelog <version>              Output changelog for <version>
+      nu remove <version ...>             Remove node <version ...>
 
     Options:
       -V, --version                       Output current version of nu
@@ -46,13 +47,9 @@ NU
       download    down    -d
       current     now/curr
       changelog   log
+      remove      rm
 
 ### Thanks to:
 * [isaacs](https://github.com/isaacs) - [nave](https://github.com/isaacs/nave)
 * [creationix](https://github.com/creationix) - [nvm](https://github.com/creationix/nvm)
 * [visionmedia](https://github.com/visionmedia) - [n](https://github.com/visionmedia/n)
-
-### ToDo：
-* 提供不同版本 changelog 信息
-* 提供不同版本 npm 包管理器
-* ...
