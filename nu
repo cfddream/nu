@@ -87,12 +87,16 @@ __nu__remove() {
 
 __nu__changelog() {
   local version=${1#v}
+  test -z "$version" && version=$(echo `__nu__latest`)
   echo "  \033[32mv$version\033[0m ChangeLog: "
   local vers="$(`echo $GET` 2> /dev/null $NODE_DIST \
     | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
     | sort -u -k 1,1n -k 2,2n -k 3,3n -t .)" 
 
   local i=$(echo $vers | sed -n "/$version/=")
+
+  test -z "$i" && echo "N/A" && return
+
   let 'i = i + 1'
   local after=$(echo $vers | sed -n "$i"'p')
   local url="$NODE_TAGS"
