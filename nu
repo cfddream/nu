@@ -24,6 +24,7 @@ __nu__help() {
     nu run <version> [args ...]         Run node <version> with [args ...]
     nu bin <version>                    Output bin path for <version>
     nu changelog <version>              Output changelog for <version>
+    nu remove <version ...>             Remove node <version ...>
 
   Options:
     -V, --version                       Output current version of nu
@@ -36,6 +37,7 @@ __nu__help() {
     download    down    -d
     current     now/curr
     changelog   log
+    remove      rm
 
 help
 }
@@ -53,6 +55,7 @@ __nu__main() {
     -v | v | version ) __nu__version ;;
     i | install ) shift; __nu__install $@ ;;
     changelog | log ) shift; __nu__changelog $@ ;;
+    rm | remove ) shift; __nu__remove $@ ;;
     bin ) shift; __nu__bin $@ ;;
     run ) shift; __nu__run $@ ;;
     use ) shift; __nu__use $@ ;;
@@ -70,8 +73,20 @@ __nu__version() {
   echo $NU_VERSION
 }
 
+__nu__remove() {
+  local version
+  test $# -eq 0 && echo "version(s) required" && return
+  while test $# -ne 0; do
+    version=${1#v}
+    test -d "$NU_DIR/$version" \
+      && {rm -rf "$NU_DIR/$version"; echo "v$version is removed";} \
+      || echo "v$version is not installed."
+    shift
+  done
+}
+
 __nu__changelog() {
-  local version=$1
+  local version=${1#v}
   echo "  \033[32mv$version\033[0m ChangeLog: "
   local vers="$(`echo $GET` 2> /dev/null $NODE_DIST \
     | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
@@ -137,7 +152,10 @@ __nu__install() {
     && ./configure --prefix=$NU_DIR/$version $config \
     && JOBS=4 make \
     || echo "$vversion make failed." \
-    && make install)
+    && make install \
+    && cd .. \
+    && rm -rf "$NU_DIR/src/$filename" \
+    && echo "rm -rf $NU_DIR/src/$filename")
 }
 
 __nu__bin() {
