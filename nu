@@ -79,7 +79,7 @@ __nu__remove() {
   while test $# -ne 0; do
     version=${1#v}
     test -d "$NU_DIR/$version" \
-      && {rm -rf "$NU_DIR/$version"; echo "v$version is removed";} \
+      && {rm -rf "$NU_DIR/$version"; echo "v$version is removed"} \
       || echo "v$version is not installed."
     shift
   done
@@ -123,7 +123,8 @@ __nu__install() {
   local dir=$NU_DIR/$version
 
   test -d "$dir" \
-    && echo "v$version is already installed."
+    && echo "v$version is already installed." \
+    && return
 
   local t=$(__nu__match $version)
   local filename="node-v$version"
@@ -164,7 +165,7 @@ __nu__install() {
 
 __nu__bin() {
   local v=$1
-  test -z $v && {__nu__check_current; v="$active";}
+  test -z $v && {__nu__check_current; v="$active"}
   v=${v#v}
   test -z $v && echo "version required." && return
 
@@ -175,7 +176,7 @@ __nu__bin() {
 
 __nu__run() {
   local v=$1
-  test -z $v && {__nu__check_current; v="$active";}
+  test -z $v && {__nu__check_current; v="$active"}
   v=${v#v}
   test -z $v && echo "v required." && return
 
@@ -183,13 +184,13 @@ __nu__run() {
 
   test $# -ne 0 && shift
 
-  test -f $bin && {echo "Running node v$v."; $bin $@;} \
+  test -f $bin && {echo "Running node v$v."; $bin $@} \
     || echo "v$v is not installed."
 }
 
 __nu__use() {
   local v=$1
-  test -z $v && {__nu__check_current; v="$active";}
+  test -z $v && {__nu__check_current; v="$active"}
   v=${v#v}
 
   test $# -eq 0 \
@@ -307,7 +308,7 @@ __nu__match() {
 
 __nu__wcl() {
   local c=`echo $1 | wc -m`
-  test $c -eq "1" && {echo 'N/A'; return 1;}
+  test $c -eq "1" && {echo 'N/A'; return 1}
   return 0
 }
 
