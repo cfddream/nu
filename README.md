@@ -29,6 +29,7 @@ NU
       nu list                             Output the versions installed
       nu lns                              Output the versions of node available
       nu current                          Output the current node version
+      nu default                          Switch to default version
       nu downlaod <version ...>           Download node <version ...>
       nu use <version> [args ...]         Use node <version> with [args ...]
       nu run <version> [args ...]         Run node <version> with [args ...]
@@ -45,9 +46,14 @@ NU
       list        ls      -ls
       lns                 -lns
       download    down    -d
+      default     def
       current     now/curr
       changelog   log
       remove      rm
+
+    Examples:
+      set default version.
+        > nu use 0.6.5 --default
 
 ### Thanks to:
 * [isaacs](https://github.com/isaacs) - [nave](https://github.com/isaacs/nave)
