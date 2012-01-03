@@ -19,6 +19,7 @@ __nu__help() {
     nu list                             Output the versions installed
     nu lns                              Output the versions of node available
     nu current                          Output the current node version
+    nu default                          Switch to default version
     nu downlaod <version ...>           Download node <version ...>
     nu use <version> [args ...]         Use node <version> with [args ...]
     nu run <version> [args ...]         Run node <version> with [args ...]
@@ -35,9 +36,14 @@ __nu__help() {
     list        ls      -ls
     lns                 -lns
     download    down    -d
+    default     def
     current     now/curr
     changelog   log
     remove      rm
+
+  Examples:
+    set default version.
+      > nu use 0.6.5 --default
 
 help
 }
@@ -59,6 +65,7 @@ __nu__main() {
     bin ) shift; __nu__bin $@ ;;
     run ) shift; __nu__run $@ ;;
     use ) shift; __nu__use $@ ;;
+    default | def ) __nu__default ;;
     now | curr | current ) __nu__current ;;
     -d | down | download ) shift; __nu__download $@ ;;
     -lns | lns ) __nu__list_nversions ;;
@@ -71,6 +78,17 @@ __nu__main() {
 
 __nu__version() {
   echo $NU_VERSION
+}
+
+__nu__default() {
+  local default=$NU_NODE_VERSION
+
+  test -z "$default" \
+    && test -f $NURC \
+    && default=`cat $NURC`
+
+  test -n "$default" \
+    && __nu__use $default --default > /dev/null
 }
 
 __nu__remove() {
@@ -190,6 +208,8 @@ __nu__run() {
 
 __nu__use() {
   local v=$1
+  # -/--default
+  local d=${2: -7}
   test -z $v && { __nu__check_current; v="$active"; }
   v=${v#v}
 
@@ -225,6 +245,12 @@ __nu__use() {
   npm_config_root="$lib"
   npm_config_manroot="$man"
   NODE_PATH="$lib"
+  test -n "$d" \
+    && test "$d" = "default" \
+    && test "$v" != "$NU_NODE_VERSION" \
+    && echo $v > $NURC \
+    && echo "v$v set default." \
+    && NU_NODE_VERSION="$v"
   #"$SHELL"
 }
 
@@ -359,6 +385,11 @@ __nu__config() {
 __nu__init() {
   NU_VERSION="0.0.1"
   NU_DIR="${NU_DIR-/usr/local/lib/nu}"
+  NURC="$NU_DIR/nurc"
+
+  test -f $NURC \
+    && NU_NODE_VERSION=`cat $NURC` \
+    && __nu__default
 
   NODE_SITE="http://nodejs.org"
   NODE_DIST="$NODE_SITE/dist/"
@@ -366,7 +397,6 @@ __nu__init() {
 
   TAR_SUFFIX="tar.gz"
   LOGPATH="/tmp/nu.log"
-
 
   which wget > /dev/null && GET="wget --no-check-certificate -q -O-"
   which curl > /dev/null && GET="curl -# -L"
