@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# vim: ft=sh ts=2 sw=2 st=2
+# vim: ft=sh:ts=2:sw=2:st=2
 #         _  __ _ __
 #        / |/ //// /
 #       / || // U / 
@@ -26,6 +26,7 @@ __nu__help() {
     nu bin <version>                    Output bin path for <version>
     nu changelog <version>              Output changelog for <version>
     nu remove <version ...>             Remove node <version ...>
+    nu cd <version>                     cd node <version> dir
 
   Options:
     -V, --version                       Output current version of nu
@@ -65,6 +66,7 @@ __nu__main() {
     bin ) shift; __nu__bin $@ ;;
     run ) shift; __nu__run $@ ;;
     use ) shift; __nu__use $@ ;;
+    cd ) shift; __nu__cd $1 ;;
     default | def ) __nu__default ;;
     now | curr | current ) __nu__current ;;
     -d | down | download ) shift; __nu__download $@ ;;
@@ -80,6 +82,12 @@ __nu__version() {
   echo $NU_VERSION
 }
 
+__nu__cd() {
+  local v=${1#v}
+  test -z "$v" && v=${$(__nu__current)#v}
+  cd "$NU_DIR/$v"
+}
+
 __nu__default() {
   local default=$NU_NODE_VERSION
 
@@ -88,7 +96,7 @@ __nu__default() {
     && default=`cat $NURC`
 
   test -n "$default" \
-    && __nu__use $default --default > /dev/null
+    && __nu__use $default --default >> /dev/null
 }
 
 __nu__remove() {
