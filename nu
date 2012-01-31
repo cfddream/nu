@@ -7,6 +7,8 @@
 #
 # Node Virtual Environments
 
+set -e
+
 __nu__help() {
   cat <<-help
 
