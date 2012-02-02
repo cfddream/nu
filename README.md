@@ -56,6 +56,7 @@ NU
         > nu use 0.6.5 --default
 
 ### Thanks to:
-* [isaacs](https://github.com/isaacs) - [nave](https://github.com/isaacs/nave)
-* [creationix](https://github.com/creationix) - [nvm](https://github.com/creationix/nvm)
-* [visionmedia](https://github.com/visionmedia) - [n](https://github.com/visionmedia/n)
+  * [isaacs](https://github.com/isaacs) - [nave](https://github.com/isaacs/nave)
+  * [creationix](https://github.com/creationix) - [nvm](https://github.com/creationix/nvm)
+  * [visionmedia](https://github.com/visionmedia) - [n](https://github.com/visionmedia/n
+  * [ekalinin](https://github.com/ekalinin) - [nodeenv](https://github.com/ekalinin/nodeenv)
